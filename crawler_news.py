@@ -12,13 +12,19 @@ def crawler_udn(category):
         data_list = []
         if category == 'constellation':
             url = 'https://udn.com/news/get_article/{}/2/6649/7268?_=1575266787923'.format(crawler_page)
+        elif category == 'military':
+            url = 'https://udn.com/news/get_article/{}/2/6638/10930?_=1575956277623'.format(crawler_page)
         else:
             break
         html = requests.get(url)
         html_et = etree.HTML(html.text)
         for news_list_num in range(1, 21):
-            one_news = html_et.xpath('/html/body/dt[{}]/a[2]'.format(news_list_num))
-            one_news_title = html_et.xpath('/html/body/dt[{}]/a[2]/h2/text()'.format(news_list_num))
+            try:
+                one_news = html_et.xpath('/html/body/dt[{}]/a[2]'.format(news_list_num))
+                one_news_title = html_et.xpath('/html/body/dt[{}]/a[2]/h2/text()'.format(news_list_num))
+            except Exception as e:
+                print(e)
+                break
             if one_news == []:
                 continue
             for news in one_news:
@@ -35,24 +41,25 @@ def crawler_udn(category):
                         content_select.append(content.text)
                     else:
                         break
-            dict_content = ''
-            content = dict_content.join(content_select)
+                dict_content = ''
+                content = dict_content.join(content_select)
 
-            data = {
-                'title':one_news_title[0],
-                'url':news_url,
-                'content':content,
-                'category':category
-            }
-            if data in data_list:
-                continue
-
-            data_list.append(data)
+                data = {
+                    'title':one_news_title[0],
+                    'url':news_url,
+                    'content':content,
+                    'category':category
+                }
+                print(data)
+                if data in data_list:
+                    continue
+                print('----------------------------------------------------------------------------')
+                data_list.append(data)
         input_sql.insert_sql(mydb, data_list)
 
 
 def main():
-    crawler_udn('constellation')
+    crawler_udn('military')
     # print(data_list)
     
 

@@ -32,7 +32,6 @@ def insert_sql(mydb, data_list):
         # SQL 插入语句
         sql = """INSERT INTO chrecords(title,url,content,keyword,category)
             VALUES ('{}','{}','{}','{}','{}')""".format(data['title'],data['url'],data['content'],'',data['category'])
-        print(sql)
         try:
             # 执行sql语句
             cursor.execute(sql)
