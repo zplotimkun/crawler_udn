@@ -31,15 +31,18 @@ def insert_sql(mydb, data_list):
 
         # SQL 插入语句
         sql = """INSERT INTO chrecords(title,url,content,keyword,category)
-            VALUES ('{}','{}','{}','{}','{}')""".format(data['title'],data['url'],data['content'],'',data['category'])
+            VALUES (%s,%s,%s,%s,%s)"""
         try:
             # 执行sql语句
-            cursor.execute(sql)
+            cursor.execute(sql, (data['title'],data['url'],data['content'],'',data['category']))
             # 提交到数据库执行
             mydb.commit()
-        except:
+        except Exception as e:
             # Rollback in case there is any error
-            print('新增資料失敗')
+            print('新增資料失敗：{}'.format(data['url']))
+            print(data)
+            print(e)
+            print('------------------------------------------------------')
             mydb.rollback()
 
 def select_sql(mydb, url):
@@ -52,5 +55,3 @@ def select_sql(mydb, url):
         return True
     else:
         return False
-
-conn_sql()
