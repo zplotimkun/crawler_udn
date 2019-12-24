@@ -1,13 +1,16 @@
+import time
+import schedule
 import requests
 
 from bs4 import BeautifulSoup
 from lxml import etree
+from datetime import date
 
 import input_sql
 
 def crawler_udn(mydb, category):
     crawler_page = 1
-    news_total = 0
+    today = date.today()
     while True:
         print('類別：{},第{}頁'.format(category, crawler_page))
 
@@ -22,6 +25,7 @@ def crawler_udn(mydb, category):
         crawler_page += 1
         html = requests.get(url)
         html_et = etree.HTML(html.text)
+        article_num = 0
         for news_list_num in range(1, 21):
             try:
                 article = html_et.xpath('/html/body/dt[{}]/a[2]'.format(news_list_num))
@@ -34,10 +38,14 @@ def crawler_udn(mydb, category):
             for news in article:
                 news_url = 'http://udn.com{}'.format(news.attrib['href'])
                 sel_sql = input_sql.select_sql(mydb, news_url)
-                if sel_sql == False or article_title == '':
-                    continue
-                news_total += 1
-                print('第{}則新聞 url:{}'.format(news_total, news_url))
+                if article_num == 0 and (sel_sql == False or article_title == ''):
+                    print('已到重複文章，結束此程式')
+                    return
+                elif sel_sql == False or article_title == '':
+                    print('已到重複文章，結束此頁')
+                    break
+                article_num += 1
+                print('第{}則新聞 url:{}'.format(article_num, news_url))
                 print('--------------------------------------------------------')
 
                 news_html = requests.get(news_url)
@@ -52,7 +60,8 @@ def crawler_udn(mydb, category):
                     'title':article_title[0],
                     'url':news_url,
                     'content':content,
-                    'category':category
+                    'category':category,
+                    'date':today.strftime('%Y-%m-%d')
                 }
                 if data in data_list:
                     continue
@@ -63,7 +72,7 @@ def crawler_udn(mydb, category):
 def crawler_udn_opinion(mydb, category):
     data_list = []
     crawler_page = 1
-    news_total = 0
+    today = date.today()
     while True:
         print('類別：{},第{}頁'.format(category, crawler_page))
 
@@ -77,6 +86,7 @@ def crawler_udn_opinion(mydb, category):
         html = requests.get(url)
         soup = BeautifulSoup(html.text, 'lxml')
         article_list = soup.find_all('h2')
+        article_num = 0
         for article in article_list:
             article_title = article.a.text
             if category == 'military':
@@ -84,11 +94,14 @@ def crawler_udn_opinion(mydb, category):
             elif category == 'travel':
                 article_url = article.a.get('href')
             sel_sql = input_sql.select_sql(mydb, article_url)
-            if sel_sql == False or article_title == '':
-                print('已到重複文章，結束此段程式')
+            if article_num == 0 and (sel_sql == False or article_title == ''):
+                print('已到重複文章，結束此程式')
                 return
-            news_total += 1
-            print('第{}則新聞 url:{}'.format(news_total, article_url))
+            elif sel_sql == False or article_title == '':
+                print('已到重複文章，結束此頁')
+                break
+            article_num += 1
+            print('第{}則新聞 url:{}'.format(article_num, article_url))
             print('--------------------------------------------------------')
             article_html = requests.get(article_url)
             article_soup = BeautifulSoup(article_html.text, 'lxml')
@@ -102,7 +115,8 @@ def crawler_udn_opinion(mydb, category):
                     'title':article_title,
                     'url':article_url,
                     'content':content,
-                    'category':category
+                    'category':category,
+                    'date':today.strftime('%Y-%m-%d')
                 }
             if data in data_list:
                 continue
@@ -112,14 +126,27 @@ def crawler_udn_opinion(mydb, category):
 
 def main():
     mydb = input_sql.conn_sql()
-    crawler_udn(mydb, 'constellation')
-    crawler_udn(mydb, 'military')
-    crawler_udn_opinion(mydb, 'military')
-    crawler_udn_opinion(mydb, 'travel')
-    # print(data_list)
-
+    func_map = {
+        'udn': crawler_udn,
+        'udn_opinion': crawler_udn_opinion
+    }
+    udn_category = {
+        'udn': [
+            'constellation',
+            'military'
+        ],
+        'udn_opinion': [
+            'military',
+            'travel',
+        ]
+    }
+    for func_key, category_list in udn_category.items():
+        for category in category_list:
+            func_map.get(func_key, lambda db, key: None)(mydb, category)
 
 
 if __name__ == "__main__":
-    main()
-
+    schedule.every().day.at("09:00").do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)

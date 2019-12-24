@@ -30,11 +30,11 @@ def insert_sql(mydb, data_list):
         cursor = mydb.cursor()
 
         # SQL 插入语句
-        sql = """INSERT INTO chrecords(title,url,content,keyword,category)
-            VALUES (%s,%s,%s,%s,%s)"""
+        sql = """INSERT INTO chrecords(title,url,content,keyword,category,date)
+            VALUES (%s,%s,%s,%s,%s,%s)"""
         try:
             # 执行sql语句
-            cursor.execute(sql, (data['title'],data['url'],data['content'],'',data['category']))
+            cursor.execute(sql, (data['title'],data['url'],data['content'],'',data['category'],data['date']))
             # 提交到数据库执行
             mydb.commit()
         except Exception as e:
