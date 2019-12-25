@@ -33,6 +33,7 @@ def crawler_upmedia(mydb, category):
             article = articles.find_all('a')
             for article_detail in article:
                 article_href = article_detail.get('href')
+
                 if 'news_info' in article_href:
                     article_title = article_detail.text
                     break
