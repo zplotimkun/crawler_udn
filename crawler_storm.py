@@ -45,10 +45,12 @@ def crawler_storm(mydb, category):
             print('-----------------------------------------------------------')
             article_html = requests.get(article_url)
             article_soup = BeautifulSoup(article_html.text)
-            article_content_list = article_soup.find_all('p')
+            article_content_list = article_soup.find_all('div', {'id': 'CMS_wrapper'})
             text_list = []
             for content_text in article_content_list:
-                text_list.append(content_text.text)
+                all_text = BeautifulSoup(content_text.text).find_all('p')
+                for text_p in all_text:
+                    text_list.append(text_p.text)
             article_content = ''.join(text_list)
             data = {
                 "title":article_title,

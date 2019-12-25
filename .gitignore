@@ -5,3 +5,4 @@ geckodriver.log
 .vscode
 .env
 venv
+Docker*
