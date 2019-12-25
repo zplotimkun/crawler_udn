@@ -57,7 +57,7 @@ def crawler_udn(mydb, category):
                 content = ''.join(content_select)
 
                 data = {
-                    'title':article_title[0],
+                    'title':article_title[0].strip(),
                     'url':news_url,
                     'content':content,
                     'category':category,
@@ -86,9 +86,14 @@ def crawler_udn_opinion(mydb, category):
         html = requests.get(url)
         soup = BeautifulSoup(html.text, 'lxml')
         article_list = soup.find_all('h2')
+
+        if article_list == []:
+            print('已到達最終頁數')
+            return
+
         article_num = 0
         for article in article_list:
-            article_title = article.a.text
+            article_title = article.a.text.strip()
             if category == 'military':
                 article_url = 'https://opinion.udn.com{}'.format(article.a.get('href'))
             elif category == 'travel':
@@ -150,3 +155,4 @@ if __name__ == "__main__":
     while True:
         schedule.run_pending()
         time.sleep(1)
+    # main()

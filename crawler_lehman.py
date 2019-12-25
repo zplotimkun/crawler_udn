@@ -27,6 +27,11 @@ def crawler_lehman(mydb, category):
         article_list = data_json['rows']
         print('第{}頁'.format(page))
         print('※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※')
+
+        if article_list == []:
+            print('已到達最終頁數')
+            return
+
         article_num = 0
         for article in article_list:
             article_href = article['id']
@@ -68,7 +73,6 @@ def crawler_lehman(mydb, category):
         time.sleep(5)
 
 
-
 def main():
     mydb = input_sql.conn_sql()
     crawler_lehman(mydb, 'military')
@@ -79,3 +83,4 @@ if __name__ == '__main__':
     while True:
         schedule.run_pending()
         time.sleep(1)
+    # main()

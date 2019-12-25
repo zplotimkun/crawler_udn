@@ -17,10 +17,16 @@ def crawler_ltn(mydb, category):
         url = 'https://playing.ltn.com.tw/list/travel/{}'.format(page)
 
         print('第{}頁'.format(page))
+        print('※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※')
 
         html = requests.get(url)
         soup = BeautifulSoup(html.text, 'lxml')
         article_list = soup.find_all("a", {"class": "tit"})
+
+        if article_list == []:
+            print('已到達最終頁數')
+            return
+
         article_num = 0
         for article in article_list:
             article_title = article.text.strip()
@@ -34,6 +40,9 @@ def crawler_ltn(mydb, category):
                 print('已到重複文章，結束此頁')
                 break
             article_num += 1
+            print('第{}篇文章, url:{}'.format(article_num, article_url))
+            print('文章標題:{}'.format(article_title))
+            print('-----------------------------------------------------------')
             article_html = requests.get(article_url)
             article_soup = BeautifulSoup(article_html.text)
             article_content_list = article_soup.find_all('p')
@@ -51,8 +60,7 @@ def crawler_ltn(mydb, category):
             if data in data_list:
                 continue
             data_list.append(data)
-            print('第{}篇文章, url:{}'.format(article_num, article_url))
-            print('-----------------------------------------------------------')
+
         input_sql.insert_sql(mydb, data_list)
         page += 1
 
@@ -71,3 +79,4 @@ if __name__ == '__main__':
     while True:
         schedule.run_pending()
         time.sleep(1)
+    # main()
