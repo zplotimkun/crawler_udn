@@ -74,7 +74,8 @@ def main():
 
 
 if __name__ == '__main__':
-    schedule.every().day.at("09:00").do(main)
+    print('crawler_mobile01 程式啟動')
+    schedule.every().day.at("12:00").do(main)
     while True:
         schedule.run_pending()
         time.sleep(1)
