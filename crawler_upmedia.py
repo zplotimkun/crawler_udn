@@ -88,9 +88,14 @@ def main():
 
 
 if __name__ == '__main__':
-    print('crawler_upmedia 程式啟動')
-    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
-    # main()
+    try:
+        print('crawler_upmedia 程式啟動')
+        schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
+        while True:
+            schedule.run_pending()
+            time.sleep(1)
+        # main()
+    except Exception as e:
+        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+        print(e)
+        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
