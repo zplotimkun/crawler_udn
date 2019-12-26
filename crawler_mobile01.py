@@ -28,11 +28,11 @@ def crawler_m01(mydb, category):
         }
         html = session.get(url, headers=headers)
         soup = BeautifulSoup(html.text, 'lxml')
-        print('第{}頁'.format(page))
+        print('page:{}'.format(page))
         print('※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※')
         article_list = soup.find_all("a", {"class": "c-articleCard"})
         if article_list == []:
-            print('已到達最終頁數')
+            print('On last page, over the App.')
             return
 
         article_num = 0
@@ -42,15 +42,15 @@ def crawler_m01(mydb, category):
             article_url = 'https://www.mobile01.com/{}'.format(article_href)
             sel_sql = input_sql.select_sql(mydb, article_url)
             if article_num == 0 and (sel_sql == False or article_title == ''):
-                print('已到重複文章，結束此程式')
+                print('Over the App.')
                 return
             elif sel_sql == False or article_title == '':
-                print('已到重複文章，結束此頁')
+                print('Over the page.')
                 break
 
             article_num += 1
-            print('第{}篇文章, url:{}'.format(article_num, article_url))
-            print('文章標題:{}'.format(article_title))
+            print('Article number:{}, url:{}'.format(article_num, article_url))
+            print('Title:{}'.format(article_title))
             print('-----------------------------------------------------------')
             article_html = session.get(article_url, headers=headers)
             article_soup = BeautifulSoup(article_html.text, 'lxml')
@@ -81,14 +81,9 @@ def main():
 
 
 if __name__ == '__main__':
-    try:
-        print('crawler_mobile01 程式啟動')
-        schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
-        # main()
-    except Exception as e:
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-        print(e)
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('crawler_mobile01 START')
+    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+    # main()

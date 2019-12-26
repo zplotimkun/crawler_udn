@@ -25,7 +25,7 @@ def crawler_ltn(mydb, category):
         data_list = []
         url = 'https://playing.ltn.com.tw/list/travel/{}'.format(page)
 
-        print('第{}頁'.format(page))
+        print('page:{}'.format(page))
         print('※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※')
 
         html = requests.get(url)
@@ -33,7 +33,7 @@ def crawler_ltn(mydb, category):
         article_list = soup.find_all("a", {"class": "tit"})
 
         if article_list == []:
-            print('已到達最終頁數')
+            print('On last page, over the App.')
             return
 
         article_num = 0
@@ -43,17 +43,17 @@ def crawler_ltn(mydb, category):
             article_url = 'https:{}'.format(article_href)
             sel_sql = input_sql.select_sql(mydb, article_url)
             if article_num == 0 and (sel_sql == False or article_title == ''):
-                print('已到重複文章，結束此程式')
+                print('Over the App.')
                 return
             elif sel_sql == False or article_title == '':
-                print('已到重複文章，結束此頁')
+                print('Over the page.')
                 break
             article_num += 1
-            print('第{}篇文章, url:{}'.format(article_num, article_url))
-            print('文章標題:{}'.format(article_title))
+            print('Article number:{}, url:{}'.format(article_num, article_url))
+            print('title:{}'.format(article_title))
             print('-----------------------------------------------------------')
             article_html = requests.get(article_url)
-            article_soup = BeautifulSoup(article_html.text)
+            article_soup = BeautifulSoup(article_html.text, 'lxml')
             article_content_list = article_soup.find_all('p')
             text_list = []
             for content_text in article_content_list:
@@ -80,14 +80,9 @@ def main():
 
 
 if __name__ == '__main__':
-    try:
-        print('crawler_ltn 程式啟動')
-        schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
-        # main()
-    except Exception as e:
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-        print(e)
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('crawler_ltn START')
+    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+    # main()

@@ -26,12 +26,12 @@ def crawler_storm(mydb, category):
         html = requests.get(url)
         soup = BeautifulSoup(html.text, 'lxml')
 
-        print('第{}頁'.format(page))
+        print('page:{}'.format(page))
         print('※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※')
 
         article_list = soup.find_all('a', {'class':'card_link link_title'})
         if article_list == []:
-            print('已到達最終頁數')
+            print('On last page, over the App.')
             return
 
         article_num = 0
@@ -42,21 +42,21 @@ def crawler_storm(mydb, category):
             sel_sql = input_sql.select_sql(mydb, article_url)
             print(article_title)
             if article_num == 0 and (sel_sql == False or article_title == ''):
-                print('已到重複文章，結束此程式')
+                print('Over the App.')
                 return
             elif sel_sql == False or article_title == '':
-                print('已到重複文章，結束此頁')
+                print('Over the page.')
                 break
             article_num += 1
-            print('第{}篇文章, url:{}'.format(article_num, article_url))
-            print('文章標題:{}'.format(article_title))
+            print('Article number:{}, url:{}'.format(article_num, article_url))
+            print('title:{}'.format(article_title))
             print('-----------------------------------------------------------')
             article_html = requests.get(article_url)
-            article_soup = BeautifulSoup(article_html.text)
+            article_soup = BeautifulSoup(article_html.text, 'lxml')
             article_content_list = article_soup.find_all('div', {'id': 'CMS_wrapper'})
             text_list = []
             for content_text in article_content_list:
-                all_text = BeautifulSoup(content_text.text).find_all('p')
+                all_text = BeautifulSoup(content_text.text, 'lxml').find_all('p')
                 for text_p in all_text:
                     text_list.append(text_p.text)
             article_content = ''.join(text_list)
@@ -81,14 +81,9 @@ def main():
 
 
 if __name__ == '__main__':
-    try:
-        print('crawler_storm 程式啟動')
-        schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
-        # main()
-    except Exception as e:
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-        print(e)
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('crawler_storm START')
+    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+    # main()

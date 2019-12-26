@@ -33,11 +33,11 @@ def crawler_lehman(mydb, category):
         data = session.post(url, data=post_data, headers=headers)
         data_json = json.loads(data.text)
         article_list = data_json['rows']
-        print('第{}頁'.format(page))
+        print('page:{}'.format(page))
         print('※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※')
 
         if article_list == []:
-            print('已到達最終頁數')
+            print('On last page, over the App.')
             return
 
         article_num = 0
@@ -47,14 +47,14 @@ def crawler_lehman(mydb, category):
             article_title = article['name']
             sel_sql = input_sql.select_sql(mydb, article_url)
             if article_num == 0 and (sel_sql == False or article_title.strip() == ''):
-                print('已到重複文章，結束此程式')
+                print('Over the App.')
                 return
             elif sel_sql == False or article_title == '':
-                print('已到重複文章，結束此頁')
+                print('Over the page.')
                 break
             article_num += 1
-            print('第{}篇文章, url:{}'.format(article_num, article_url))
-            print('文章標題:{}'.format(article_title))
+            print('Article number:{}, url:{}'.format(article_num, article_url))
+            print('title:{}'.format(article_title))
             print('-----------------------------------------------------------')
             article_html = session.get(article_url, headers=headers)
             article_soup = BeautifulSoup(article_html.text, 'lxml')
@@ -87,14 +87,9 @@ def main():
 
 
 if __name__ == '__main__':
-    try:
-        print('crawler_lehman 程式啟動')
-        schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
-        while True:
-            schedule.run_pending()
-            time.sleep(1)
-        # main()
-    except Exception as e:
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
-        print(e)
-        print('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')
+    print('crawler_lehman START')
+    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
+    while True:
+        schedule.run_pending()
+        time.sleep(1)
+    # main()
