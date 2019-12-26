@@ -1,12 +1,21 @@
+import os
 import time
 import schedule
 import requests
 
 from bs4 import BeautifulSoup
 from lxml import etree
+from dotenv import load_dotenv
+from pathlib import Path
 from datetime import date
 
 import input_sql
+
+
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+hour = os.getenv("Hour")
+minute = os.getenv('Min')
 
 def crawler_udn(mydb, category):
     crawler_page = 1
@@ -152,7 +161,7 @@ def main():
 
 if __name__ == "__main__":
     print('crawler_udn 程式啟動')
-    schedule.every().day.at("12:00").do(main)
+    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
     while True:
         schedule.run_pending()
         time.sleep(1)
