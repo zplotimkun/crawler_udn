@@ -1,12 +1,20 @@
+import os
 import time
 import schedule
 import requests
 
 from bs4 import BeautifulSoup
 from lxml import etree
+from dotenv import load_dotenv
+from pathlib import Path
 from datetime import date
 
 import input_sql
+
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+hour = os.getenv("Hour")
+minute = os.getenv('Min')
 
 def crawler_upmedia(mydb, category):
     page = 1
@@ -21,11 +29,11 @@ def crawler_upmedia(mydb, category):
         html = session.get(url, headers=headers)
         soup = BeautifulSoup(html.text, 'lxml')
         article_list = soup.find_all('dd')
-        print('第{}頁'.format(page))
+        print('page:{}'.format(page))
         print('※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※')
 
         if article_list == []:
-            print('已到達最終頁數')
+            print('On last page, over the App.')
             return
 
         article_num = 0
@@ -40,14 +48,14 @@ def crawler_upmedia(mydb, category):
             article_url = 'https://www.upmedia.mg/{}'.format(article_href)
             sel_sql = input_sql.select_sql(mydb, article_url)
             if article_num == 0 and (sel_sql == False or article_title.strip() == ''):
-                print('已到重複文章，結束此程式')
+                print('Over the App.')
                 return
             elif sel_sql == False or article_title == '':
-                print('已到重複文章，結束此頁')
+                print('Over the page.')
                 break
             article_num += 1
-            print('第{}篇文章, url:{}'.format(article_num, article_url))
-            print('文章標題:{}'.format(article_title))
+            print('Article number:{}, url:{}'.format(article_num, article_url))
+            print('Title:{}'.format(article_title))
             print('-----------------------------------------------------------')
             article_html = session.get(article_url, headers=headers)
             article_soup = BeautifulSoup(article_html.text, 'lxml')
@@ -80,8 +88,8 @@ def main():
 
 
 if __name__ == '__main__':
-    print('crawler_upmedia 程式啟動')
-    schedule.every().day.at("12:00").do(main)
+    print('crawler_upmedia START')
+    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
     while True:
         schedule.run_pending()
         time.sleep(1)

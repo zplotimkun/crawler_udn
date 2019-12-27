@@ -1,18 +1,27 @@
+import os
 import time
 import schedule
 import requests
 
 from bs4 import BeautifulSoup
 from lxml import etree
+from dotenv import load_dotenv
+from pathlib import Path
 from datetime import date
 
 import input_sql
+
+
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+hour = os.getenv("Hour")
+minute = os.getenv('Min')
 
 def crawler_udn(mydb, category):
     crawler_page = 1
     today = date.today()
     while True:
-        print('類別：{},第{}頁'.format(category, crawler_page))
+        print('category：{}, page:{}'.format(category, crawler_page))
 
         data_list = []
         if category == 'constellation':
@@ -39,13 +48,13 @@ def crawler_udn(mydb, category):
                 news_url = 'http://udn.com{}'.format(news.attrib['href'])
                 sel_sql = input_sql.select_sql(mydb, news_url)
                 if article_num == 0 and (sel_sql == False or article_title == ''):
-                    print('已到重複文章，結束此程式')
+                    print('Over the App.')
                     return
                 elif sel_sql == False or article_title == '':
-                    print('已到重複文章，結束此頁')
+                    print('Over the page.')
                     break
                 article_num += 1
-                print('第{}則新聞 url:{}'.format(article_num, news_url))
+                print('Article number:{}, url:{}'.format(article_num, news_url))
                 print('--------------------------------------------------------')
 
                 news_html = requests.get(news_url)
@@ -74,7 +83,7 @@ def crawler_udn_opinion(mydb, category):
     crawler_page = 1
     today = date.today()
     while True:
-        print('類別：{},第{}頁'.format(category, crawler_page))
+        print('category：{}, page:{}'.format(category, crawler_page))
 
         if category == 'military':
             url = 'https://opinion.udn.com/opinion/ajax_articletag/%E8%BB%8D%E4%BA%8B%E8%A9%95%E8%AB%96/{}?_=1576737799589'.format(crawler_page)
@@ -88,7 +97,7 @@ def crawler_udn_opinion(mydb, category):
         article_list = soup.find_all('h2')
 
         if article_list == []:
-            print('已到達最終頁數')
+            print('On last page, over the App.')
             return
 
         article_num = 0
@@ -100,13 +109,13 @@ def crawler_udn_opinion(mydb, category):
                 article_url = article.a.get('href')
             sel_sql = input_sql.select_sql(mydb, article_url)
             if article_num == 0 and (sel_sql == False or article_title == ''):
-                print('已到重複文章，結束此程式')
+                print('Over the App.')
                 return
             elif sel_sql == False or article_title == '':
-                print('已到重複文章，結束此頁')
+                print('Over the page.')
                 break
             article_num += 1
-            print('第{}則新聞 url:{}'.format(article_num, article_url))
+            print('Article number:{}, url:{}'.format(article_num, article_url))
             print('--------------------------------------------------------')
             article_html = requests.get(article_url)
             article_soup = BeautifulSoup(article_html.text, 'lxml')
@@ -151,8 +160,8 @@ def main():
 
 
 if __name__ == "__main__":
-    print('crawler_udn 程式啟動')
-    schedule.every().day.at("12:00").do(main)
+    print('crawler_udn START')
+    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
     while True:
         schedule.run_pending()
         time.sleep(1)

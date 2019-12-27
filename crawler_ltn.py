@@ -1,12 +1,21 @@
+import os
 import time
 import schedule
 import requests
 
 from bs4 import BeautifulSoup
 from lxml import etree
+from dotenv import load_dotenv
+from pathlib import Path
 from datetime import date
 
 import input_sql
+
+
+env_path = Path('.') / '.env'
+load_dotenv(dotenv_path=env_path)
+hour = os.getenv("Hour")
+minute = os.getenv('Min')
 
 
 def crawler_ltn(mydb, category):
@@ -16,7 +25,7 @@ def crawler_ltn(mydb, category):
         data_list = []
         url = 'https://playing.ltn.com.tw/list/travel/{}'.format(page)
 
-        print('第{}頁'.format(page))
+        print('page:{}'.format(page))
         print('※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※※')
 
         html = requests.get(url)
@@ -24,7 +33,7 @@ def crawler_ltn(mydb, category):
         article_list = soup.find_all("a", {"class": "tit"})
 
         if article_list == []:
-            print('已到達最終頁數')
+            print('On last page, over the App.')
             return
 
         article_num = 0
@@ -34,17 +43,17 @@ def crawler_ltn(mydb, category):
             article_url = 'https:{}'.format(article_href)
             sel_sql = input_sql.select_sql(mydb, article_url)
             if article_num == 0 and (sel_sql == False or article_title == ''):
-                print('已到重複文章，結束此程式')
+                print('Over the App.')
                 return
             elif sel_sql == False or article_title == '':
-                print('已到重複文章，結束此頁')
+                print('Over the page.')
                 break
             article_num += 1
-            print('第{}篇文章, url:{}'.format(article_num, article_url))
-            print('文章標題:{}'.format(article_title))
+            print('Article number:{}, url:{}'.format(article_num, article_url))
+            print('title:{}'.format(article_title))
             print('-----------------------------------------------------------')
             article_html = requests.get(article_url)
-            article_soup = BeautifulSoup(article_html.text)
+            article_soup = BeautifulSoup(article_html.text, 'lxml')
             article_content_list = article_soup.find_all('p')
             text_list = []
             for content_text in article_content_list:
@@ -65,18 +74,14 @@ def crawler_ltn(mydb, category):
         page += 1
 
 
-
-
-
-
 def main():
     mydb = input_sql.conn_sql()
     crawler_ltn(mydb, 'travel')
 
 
 if __name__ == '__main__':
-    print('crawler_ltn 程式啟動')
-    schedule.every().day.at("12:00").do(main)
+    print('crawler_ltn START')
+    schedule.every().day.at("{}:{}".format(hour, minute)).do(main)
     while True:
         schedule.run_pending()
         time.sleep(1)
