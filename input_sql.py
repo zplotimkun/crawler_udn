@@ -13,7 +13,7 @@ password = os.getenv('Password')
 
 def conn_sql():
     mydb = mysql.connector.connect(
-        host="192.168.1.100",
+        host="alpha.ponddy-one.com",
         database="engwebdata",
         user=user,
         password=password,
@@ -26,20 +26,18 @@ def conn_sql():
 def insert_sql(mydb, data_list):
     for data in data_list:
 
-        # 使用cursor()方法获取操作游标 
         cursor = mydb.cursor()
 
-        # SQL 插入语句
         sql = """INSERT INTO chrecords(title,url,content,keyword,category,date)
             VALUES (%s,%s,%s,%s,%s,%s)"""
         try:
-            # 执行sql语句
+
             cursor.execute(sql, (data['title'],data['url'],data['content'],'',data['category'],data['date']))
-            # 提交到数据库执行
+
             mydb.commit()
         except Exception as e:
-            # Rollback in case there is any error
-            print('新增資料失敗：{}'.format(data['url']))
+
+            print('Add data error, url：{}'.format(data['url']))
             print(data)
             print(e)
             print('------------------------------------------------------')
