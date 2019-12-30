@@ -21,6 +21,7 @@ minute = os.getenv('Min')
 def crawler_ltn(mydb, category):
     page = 1
     today = date.today()
+    print('Today is {}'.format(today))
     while True:
         data_list = []
         url = 'https://playing.ltn.com.tw/list/travel/{}'.format(page)

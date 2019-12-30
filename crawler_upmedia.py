@@ -19,6 +19,7 @@ minute = os.getenv('Min')
 def crawler_upmedia(mydb, category):
     page = 1
     today= date.today()
+    print('Today is {}'.format(today))
     while True:
         data_list = []
         url = 'https://www.upmedia.mg/news_list.php?currentPage={}&Type=157'.format(page)

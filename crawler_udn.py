@@ -20,6 +20,7 @@ minute = os.getenv('Min')
 def crawler_udn(mydb, category):
     crawler_page = 1
     today = date.today()
+    print('Today is {}'.format(today))
     while True:
         print('category：{}, page:{}'.format(category, crawler_page))
 
@@ -82,6 +83,7 @@ def crawler_udn_opinion(mydb, category):
     data_list = []
     crawler_page = 1
     today = date.today()
+    print('Today is {}'.format(today))
     while True:
         print('category：{}, page:{}'.format(category, crawler_page))
 

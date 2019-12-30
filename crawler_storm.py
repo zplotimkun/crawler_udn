@@ -20,6 +20,7 @@ minute = os.getenv('Min')
 def crawler_storm(mydb, category):
     page = 1
     today = date.today()
+    print('Today is {}'.format(today))
     while True:
         data_list = []
         url = 'https://www.storm.mg/authors/126954/%E9%A2%A8%E4%BA%91%E8%BB%8D%E4%BA%8B/{}'.format(page)

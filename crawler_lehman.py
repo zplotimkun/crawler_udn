@@ -19,6 +19,7 @@ minute = os.getenv('Min')
 def crawler_lehman(mydb, category):
     page = 1
     today = date.today()
+    print('Today is {}'.format(today))
     while True:
         data_list = []
         url = 'http://123.57.143.90/art/articleHomeShows.htm'

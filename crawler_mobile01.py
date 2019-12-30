@@ -19,6 +19,7 @@ minute = os.getenv('Min')
 def crawler_m01(mydb, category):
     page = 1
     today = date.today()
+    print('Today is {}'.format(today))
     while True:
         data_list = []
         url = 'https://www.mobile01.com/articles.php?c=18&p={}'.format(page)
